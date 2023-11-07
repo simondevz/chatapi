@@ -15,11 +15,11 @@ from pathlib import Path
 import environ
 
 env = environ.Env()
-environ.Env.read_env()
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -39,17 +39,18 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'daphne',
     'chat',
+    'chat.apps.CustomRoomsConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'channels_presence',
     'dj_rest_auth',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
     'corsheaders',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -73,6 +74,20 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'chatapi.urls'
 SITE_ID = 1
+AUTH_USER_MODEL = 'chat.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    )
+}
+
+REST_AUTH = {
+    'SESSION_LOGIN': False,
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'my-app-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'my-refresh-token',
+}
 
 TEMPLATES = [
     {

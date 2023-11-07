@@ -1,20 +1,23 @@
-from django.http import HttpResponse, JsonResponse
+import json
 from django.contrib.auth import get_user_model
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework import generics
 
 from . import serializers
 
 User = get_user_model()
-# Create your views here.
 
 
-def index(request):
-    return HttpResponse('hi there')
+class ListUsers(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = serializers.UserSerializer
+    Permission_class = [AllowAny]
 
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = serializers.UserSerializer(queryset, many=True)
 
-class ListAvailableUsers(APIView):
-    def get(self, request):
-        data = serializers.ListUserSerialisers(User.objects.all(), many=True)
-        return Response(data.data, headers={'Access-Control-Allow-Origin': '*'
-                                            })
+        for data in serializer.data:
+            data['current_rooms'] = json.loads(data['current_rooms'])
+        return Response(serializer.data)
